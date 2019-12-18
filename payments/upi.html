@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UPI Payments Test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div id="formFields">
+        <form class="form-horizontal">
+            <div class="form-group row">
+                <label class="control-label col-xs-3" for="pa">Payee VPA (pa):</label>
+                <div class="col-xs-9">
+                    <input class="form-control" type="text" id="pa" value="beneficiary@icici">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="control-label col-xs-3" for="pn">Payee Name (pn):</label>
+                <div class="col-xs-9">
+                    <input class="form-control" type="text" id="pn" value="Beneficiary Name">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="control-label col-xs-3" for="amount">Amount (am):</label>
+                <div class="col-xs-9">
+                    <input class="form-control" type="number" id="amount" value="12.65">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="control-label col-xs-3" for="tn">Transaction Note (tn):</label>
+                <div class="col-xs-9">
+                    <input class="form-control" type="text" id="tn" value="Test Note">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="control-label col-xs-3" for="mc">Merchant Code (mc):</label>
+                <div class="col-xs-9">
+                    <input class="form-control" type="text" id="mc" value="18245">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="control-label col-xs-3" for="tid">Transaction ID (tid):</label>
+                <div class="col-xs-9">
+                    <input class="form-control" type="text" id="tid" value="TID123">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="control-label col-xs-3" for="tr">Transaction Ref ID (tr):</label>
+                <div class="col-xs-9">
+                    <input class="form-control" type="text" id="tr" value="REFID123">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="control-label col-xs-3" for="url">Reference URL (url):</label>
+                <div class="col-xs-9">
+                    <input class="form-control" type="url" id="url" value="https://website.com">
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <div id="outputSection" class="form-horizontal">
+        <div class="form-group row">
+            <label class="control-label col-xs-3" for="link">Formatted Link:</label>
+            <div class="col-xs-9">
+                <input readonly id="response" class="form-control" type="url" value="https://website.com"></input>
+            </div>            
+        </form>
+    </div>
+
+    <div id="actionSection">
+        <div class="form-horizontal">
+            <label id="copied" style="display:none;">Copied!</label>            
+            <button class="btn btn-info pull-right" onclick="onCopyClicked()">Copy</button>        
+            <button class="btn btn-info pull-right" onclick="onGenerateClicked()">Pay</button>            
+        </div>
+    </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script type="text/javascript">
+        function onGenerateClicked(){
+            window.location.href = document.getElementById('response').value;
+        }
+
+        function onCopyClicked() {
+            /* Get the text field */
+            var copyText = document.getElementById("response");
+
+            /* Select the text field */
+            copyText.select();
+
+            /* Copy the text inside the text field */
+            document.execCommand("copy");
+
+            /* Alert the copied text */
+            
+
+            setTimeout(function(){
+                $('#copied').fadeIn();
+            }, 100);
+
+            setTimeout(function(){
+                $('#copied').fadeOut();
+            }, 650);
+        }
+
+        function readUpiFields() {
+          let returnValue = {};
+          returnValue['pa'] = document.getElementById('pa').value;
+          returnValue['pn'] = document.getElementById('pn').value;
+          returnValue['tn'] = document.getElementById('tn').value;
+          returnValue['mc'] = document.getElementById('mc').value;
+          returnValue['tr'] = document.getElementById('tr').value;
+          returnValue['tid'] = document.getElementById('tid').value;
+          returnValue['url'] = document.getElementById('url').value;
+          returnValue['am'] = document.getElementById('amount').value;
+          return returnValue;
+        }
+
+        function formatPaymentLink(linkFormat, linkFields){
+            var formattedLink = linkFormat;
+            for (var key in linkFields) {
+                var placeholder = '{' + key + '}';
+                var field = linkFields[key];
+                if(!field || field == ''){
+                    field = 'null';
+                    if(key == 'am'){
+                        field = '0.00';
+                    }
+                }
+                formattedLink = formattedLink.replace(placeholder, field);
+            }
+            
+            return formattedLink;
+        }
+
+        function keyCapture(event){
+            // var paymentLink = 'upi://pay?pa={pa}&pn={pn}&mc={mc}&tid={tid}&tr={tr}&tn={tn}&am={am}&mam=null&cu=INR&url={url}&mode=05&orgid=000000&mid=1234&msid=3432&mtid=1212'
+
+            var paymentLink = 'upi://pay?pa={pa}&pn={pn}&mc={mc}&tid={tid}&tr={tr}&tn={tn}&am={am}&mam=null&cu=INR&url={url}&mode=05&orgid=000000&mid=1234&msid=3432&mtid=1212'            
+
+            let upiFields = readUpiFields();
+            var formattedPaymentLink = formatPaymentLink(paymentLink, upiFields);
+            document.getElementById('response').value = formattedPaymentLink;                            
+        }
+
+
+
+
+        $("#formFields").bind("keypress keyup keydown", keyCapture);
+        keyCapture(null); 
+    </script>
+</body>
+</html>
